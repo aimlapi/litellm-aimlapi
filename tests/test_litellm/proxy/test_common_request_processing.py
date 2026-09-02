@@ -3013,7 +3013,9 @@ class TestHandleLLMApiExceptionDictDetail:
         assert "NotFoundError" in proxy_exc.message
 
     async def test_exception_with_status_code_propagates(self):
-        """Exception with a statically-set status_code should propagate it."""
+        """Exception with a statically-set status_code should propagate it,
+        including its message: a real provider error is safe and useful to
+        forward as-is."""
         from litellm.llms.vertex_ai.common_utils import VertexAIError
 
         exc = VertexAIError(
@@ -3022,12 +3024,33 @@ class TestHandleLLMApiExceptionDictDetail:
         )
         proxy_exc = await self._invoke(exc)
         assert proxy_exc.code == "429"
+        assert proxy_exc.message == "Rate limit exceeded"
 
     async def test_exception_without_status_code_defaults_to_500(self):
-        """Exception with no status_code attribute defaults to 500."""
+        """Exception with no status_code attribute defaults to 500, and its raw
+        text must never reach the client: an unclassified exception never went
+        through litellm's provider-error redaction, so its message may carry
+        secrets, file paths, or other internals. Regression for LIT-6747."""
+        from litellm.constants import GENERIC_INTERNAL_SERVER_ERROR_MESSAGE
+
         exc = ValueError("Something broke")
         proxy_exc = await self._invoke(exc)
         assert proxy_exc.code == "500"
+        assert proxy_exc.message == GENERIC_INTERNAL_SERVER_ERROR_MESSAGE
+        assert "Something broke" not in proxy_exc.message
+
+    async def test_unclassified_exception_does_not_leak_secrets_to_client(self):
+        """A bug in proxy-layer code (a custom callback, a hook) can raise any
+        exception, and its message may embed credentials or infra details.
+        Only the client-facing response is sanitized; server-side logging
+        keeps the original exception unchanged. Regression for LIT-6747."""
+        exc = RuntimeError(
+            "Failed to connect to postgresql://litellm_internal:S3cr3tPGPass@10.20.30.40:5432/litellm_prod"
+        )
+        proxy_exc = await self._invoke(exc)
+        assert proxy_exc.code == "500"
+        assert "S3cr3tPGPass" not in proxy_exc.message
+        assert "10.20.30.40" not in proxy_exc.message
 
     async def test_already_normalized_proxy_exception_is_honored(self):
         """A ProxyException raised mid-request (e.g. a guardrail block) is already

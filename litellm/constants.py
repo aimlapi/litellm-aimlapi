@@ -1910,6 +1910,10 @@ BROWSER_SECURITY_HEADERS: Final[frozenset[str]] = frozenset(
 
 UNSAFE_PROXY_RESPONSE_HEADERS: Final[frozenset[str]] = HTTP_FRAMING_HEADERS | BROWSER_SECURITY_HEADERS
 
+# Client-facing message for an exception the provider/proxy mapping layer never
+# classified. The original exception is still logged server-side in full.
+GENERIC_INTERNAL_SERVER_ERROR_MESSAGE: Final[str] = "Internal server error"
+
 # A retrieved response replays the usage of the call that created it, so pricing these
 # read/management routes like inference bills the same tokens twice.
 NON_INFERENCE_CALL_TYPES: Final[frozenset[str]] = frozenset(
