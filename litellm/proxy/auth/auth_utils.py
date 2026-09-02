@@ -1402,7 +1402,7 @@ def is_pass_through_provider_route(route: str) -> bool:
     return False
 
 
-def _has_user_setup_sso() -> bool:
+def has_user_setup_sso() -> bool:
     """
     Check if the user has set up single sign-on (SSO).
 

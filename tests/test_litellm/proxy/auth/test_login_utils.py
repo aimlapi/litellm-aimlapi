@@ -598,3 +598,166 @@ class TestEncodeUiSessionJwt:
         request.cookies = {"token": token}
         with patch("litellm.proxy.proxy_server.master_key", "sk-master-for-tests"):
             assert _user_id_from_session_cookie(request) == "cornell-user"
+
+
+class TestDisablePasswordLoginWhenSSOEnabled:
+    """`disable_password_login_when_sso_enabled` must reject every
+    username/password login attempt (including the UI_USERNAME/UI_PASSWORD
+    admin fallback) once SSO is configured, so SSO becomes the only way to
+    reach the Admin UI. It must not affect logins when SSO is unconfigured,
+    so admins can never lock themselves out with no SSO to fall back to."""
+
+    @pytest.mark.asyncio
+    async def test_rejects_correct_admin_credentials_when_sso_configured(self):
+        master_key = "sk-1234"
+        ui_username = "admin"
+
+        mock_prisma_client = MagicMock()
+        mock_prisma_client.db.litellm_usertable.find_first = AsyncMock(return_value=None)
+
+        with patch.dict(os.environ, {"UI_USERNAME": ui_username, "UI_PASSWORD": master_key}):
+            with patch(
+                "litellm.proxy.auth.login_utils.has_user_setup_sso",
+                return_value=True,
+            ):
+                with pytest.raises(ProxyException) as exc_info:
+                    await authenticate_user(
+                        username=ui_username,
+                        password=master_key,
+                        master_key=master_key,
+                        prisma_client=mock_prisma_client,
+                        general_settings={"disable_password_login_when_sso_enabled": True},
+                    )
+
+        assert exc_info.value.type == ProxyErrorTypes.auth_error
+        assert exc_info.value.code == "403"
+        # The credential comparison must never even run.
+        mock_prisma_client.db.litellm_usertable.find_first.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_rejects_correct_db_user_credentials_when_sso_configured(self):
+        master_key = "sk-1234"
+        user_email = "test@example.com"
+        password = "correct-password"
+
+        mock_user = LiteLLM_UserTable(
+            user_id="test-user-123",
+            user_email=user_email,
+            password=hash_token(token=password),
+            user_role=LitellmUserRoles.INTERNAL_USER,
+        )
+        mock_prisma_client = MagicMock()
+        mock_prisma_client.db.litellm_usertable.find_first = AsyncMock(return_value=mock_user)
+
+        with patch.dict(os.environ, {"UI_USERNAME": "admin", "UI_PASSWORD": "unrelated"}):
+            with patch(
+                "litellm.proxy.auth.login_utils.has_user_setup_sso",
+                return_value=True,
+            ):
+                with pytest.raises(ProxyException) as exc_info:
+                    await authenticate_user(
+                        username=user_email,
+                        password=password,
+                        master_key=master_key,
+                        prisma_client=mock_prisma_client,
+                        general_settings={"disable_password_login_when_sso_enabled": True},
+                    )
+
+        assert exc_info.value.code == "403"
+        mock_prisma_client.db.litellm_usertable.find_first.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_allows_password_login_when_setting_enabled_but_sso_not_configured(self):
+        """The setting alone must not lock out an admin who has not actually
+        configured SSO — there would be no fallback left."""
+        master_key = "sk-1234"
+        ui_username = "admin"
+
+        mock_prisma_client = MagicMock()
+        mock_prisma_client.db.litellm_usertable.find_first = AsyncMock(return_value=None)
+
+        with patch.dict(
+            os.environ,
+            {
+                "UI_USERNAME": ui_username,
+                "UI_PASSWORD": master_key,
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+            },
+            clear=True,
+        ):
+            with patch(
+                "litellm.proxy.auth.login_utils.has_user_setup_sso",
+                return_value=False,
+            ):
+                with patch(
+                    "litellm.proxy.auth.login_utils.generate_key_helper_fn",
+                    new_callable=AsyncMock,
+                    return_value={"token": "test-token", "user_id": LITELLM_PROXY_ADMIN_NAME},
+                ):
+                    with patch(
+                        "litellm.proxy.auth.login_utils.user_update",
+                        new_callable=AsyncMock,
+                        return_value=None,
+                    ):
+                        with patch(
+                            "litellm.proxy.auth.login_utils.get_secret_bool",
+                            return_value=False,
+                        ):
+                            result = await authenticate_user(
+                                username=ui_username,
+                                password=master_key,
+                                master_key=master_key,
+                                prisma_client=mock_prisma_client,
+                                general_settings={"disable_password_login_when_sso_enabled": True},
+                            )
+
+        assert isinstance(result, LoginResult)
+        assert result.user_id == LITELLM_PROXY_ADMIN_NAME
+
+    @pytest.mark.asyncio
+    async def test_allows_password_login_when_sso_configured_but_setting_not_enabled(self):
+        """SSO being configured must not, by itself, disable the password
+        fallback: the setting is opt-in."""
+        master_key = "sk-1234"
+        ui_username = "admin"
+
+        mock_prisma_client = MagicMock()
+        mock_prisma_client.db.litellm_usertable.find_first = AsyncMock(return_value=None)
+
+        with patch.dict(
+            os.environ,
+            {
+                "UI_USERNAME": ui_username,
+                "UI_PASSWORD": master_key,
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+            },
+            clear=True,
+        ):
+            with patch(
+                "litellm.proxy.auth.login_utils.has_user_setup_sso",
+                return_value=True,
+            ):
+                with patch(
+                    "litellm.proxy.auth.login_utils.generate_key_helper_fn",
+                    new_callable=AsyncMock,
+                    return_value={"token": "test-token", "user_id": LITELLM_PROXY_ADMIN_NAME},
+                ):
+                    with patch(
+                        "litellm.proxy.auth.login_utils.user_update",
+                        new_callable=AsyncMock,
+                        return_value=None,
+                    ):
+                        with patch(
+                            "litellm.proxy.auth.login_utils.get_secret_bool",
+                            return_value=False,
+                        ):
+                            result = await authenticate_user(
+                                username=ui_username,
+                                password=master_key,
+                                master_key=master_key,
+                                prisma_client=mock_prisma_client,
+                                general_settings={},
+                            )
+
+        assert isinstance(result, LoginResult)
+        assert result.user_id == LITELLM_PROXY_ADMIN_NAME
