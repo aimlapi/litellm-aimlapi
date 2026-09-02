@@ -29,7 +29,17 @@ const CredentialField = ({ field }: { field: AgentCredentialFieldMetadata }) => 
     name={field.key}
     label={field.tooltip ? labelWithHint(field.label, field.tooltip) : field.label}
     defaultValue={field.default_value ?? undefined}
-    rules={field.required ? { required: `Please enter ${field.label}` } : undefined}
+    rules={{
+      ...(field.required ? { required: `Please enter ${field.label}` } : {}),
+      ...(field.validation_pattern
+        ? {
+            pattern: {
+              value: new RegExp(field.validation_pattern),
+              message: field.validation_message || `${field.label} looks incomplete or malformed`,
+            },
+          }
+        : {}),
+    }}
   >
     {({ value, onChange, ref, ...control }) => {
       const text = typeof value === "string" ? value : "";
