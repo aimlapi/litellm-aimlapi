@@ -32,6 +32,24 @@
     }
   },
   "providers": {
+    "aiml": {
+      "display_name": "aimlapi.com (`aiml`)",
+      "url": "https://docs.litellm.ai/docs/providers/aiml",
+      "endpoints": {
+        "chat_completions": true,
+        "messages": true,
+        "responses": true,
+        "embeddings": true,
+        "image_generations": true,
+        "audio_transcriptions": false,
+        "audio_speech": false,
+        "moderations": false,
+        "batches": false,
+        "rerank": false,
+        "a2a": true,
+        "interactions": true
+      }
+    },
     "a2a": {
       "display_name": "A2A (Agent-to-Agent) (`a2a`)",
       "url": "https://docs.litellm.ai/docs/providers/a2a",
@@ -64,24 +82,6 @@
         "batches": false,
         "rerank": false,
         "a2a": false
-      }
-    },
-    "aiml": {
-      "display_name": "aimlapi.com (`aiml`)",
-      "url": "https://docs.litellm.ai/docs/providers/aiml",
-      "endpoints": {
-        "chat_completions": true,
-        "messages": true,
-        "responses": true,
-        "embeddings": true,
-        "image_generations": true,
-        "audio_transcriptions": false,
-        "audio_speech": false,
-        "moderations": false,
-        "batches": false,
-        "rerank": false,
-        "a2a": true,
-        "interactions": true
       }
     },
     "ai21": {
