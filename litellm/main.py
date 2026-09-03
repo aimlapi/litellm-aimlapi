@@ -2534,6 +2534,11 @@ def _complete_custom_openai(
 
     headers = headers or litellm.headers
 
+    if custom_llm_provider == "aiml":
+        from litellm.llms.aiml.common_utils import with_aiml_attribution
+
+        headers = with_aiml_attribution(headers, api_base)
+
     # Add GitHub Copilot headers (same as /responses endpoint does)
     if custom_llm_provider == "github_copilot":
         from litellm.llms.github_copilot.authenticator import Authenticator
