@@ -1,7 +1,7 @@
 [
   {
     "provider": "AIML",
-    "provider_display_name": "AI/ML API",
+    "provider_display_name": "aimlapi.com",
     "litellm_provider": "aiml",
     "credential_fields": [
       {
