@@ -67,7 +67,7 @@
       }
     },
     "aiml": {
-      "display_name": "AI/ML API (`aiml`)",
+      "display_name": "aimlapi.com (`aiml`)",
       "url": "https://docs.litellm.ai/docs/providers/aiml",
       "endpoints": {
         "chat_completions": true,

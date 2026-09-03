@@ -69,7 +69,7 @@ export enum Providers {
   A2A_Agent = "A2A Agent",
   AI21 = "Ai21",
   AI21_CHAT = "Ai21 Chat",
-  AIML = "AI/ML API",
+  AIML = "aimlapi.com",
   AIOHTTP_OPENAI = "Aiohttp Openai",
   Anthropic = "Anthropic",
   ANTHROPIC_TEXT = "Anthropic Text",
