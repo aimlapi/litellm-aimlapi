@@ -50,7 +50,7 @@ def test_completion_sends_every_attribution_header_on_the_wire(monkeypatch):
     headers = sent[0].headers
     assert headers["http-referer"] == "https://github.com/BerriAI/litellm"
     assert headers["x-title"] == "LiteLLM"
-    assert headers["x-aimlapi-partner-id"] == "part_litellm"
+    assert headers["x-aimlapi-partner-id"] == "part_O0eykPA6gQNIFEYaUBojBbU4"
     assert headers["x-aimlapi-source"] == "agent/litellm"
 
 
@@ -68,7 +68,7 @@ def test_completion_keeps_caller_supplied_headers(monkeypatch):
     headers = sent[0].headers
     assert headers["x-title"] == "my-app"
     assert headers["x-custom"] == "kept"
-    assert headers["x-aimlapi-partner-id"] == "part_litellm"
+    assert headers["x-aimlapi-partner-id"] == "part_O0eykPA6gQNIFEYaUBojBbU4"
 
 
 def test_completion_withholds_attribution_from_a_non_aimlapi_base(monkeypatch):

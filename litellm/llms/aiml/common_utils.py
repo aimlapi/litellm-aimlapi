@@ -13,7 +13,7 @@ AIML_ATTRIBUTION_HEADERS: Final[Mapping[str, str]] = types.MappingProxyType(
     {
         "HTTP-Referer": "https://github.com/BerriAI/litellm",
         "X-Title": "LiteLLM",
-        "X-AIMLAPI-Partner-ID": "part_litellm",
+        "X-AIMLAPI-Partner-ID": "part_O0eykPA6gQNIFEYaUBojBbU4",
         "X-AIMLAPI-Source": "agent/litellm",
     }
 )
