@@ -1,7 +1,7 @@
 from typing import Final
 
+from litellm.llms.aiml.common_utils import get_aiml_api_base, get_aiml_api_key
 from litellm.llms.openai.chat.gpt_transformation import OpenAIGPTConfig
-from litellm.secret_managers.main import get_secret_str
 
 
 class AIMLChatConfig(OpenAIGPTConfig):
@@ -12,9 +12,6 @@ class AIMLChatConfig(OpenAIGPTConfig):
     def _get_openai_compatible_provider_info(
         self, api_base: str | None, api_key: str | None
     ) -> tuple[str | None, str | None]:
-        # AIML is openai compatible, we just need to set the api_base
-        api_base = (
-            api_base or get_secret_str("AIML_API_BASE") or "https://api.aimlapi.com/v1"  # Default AIML API base URL
-        )
-        dynamic_api_key: Final = api_key or get_secret_str("AIML_API_KEY")
-        return api_base, dynamic_api_key
+        resolved_api_base: Final = get_aiml_api_base(api_base)
+        dynamic_api_key: Final = get_aiml_api_key(api_key)
+        return resolved_api_base, dynamic_api_key
