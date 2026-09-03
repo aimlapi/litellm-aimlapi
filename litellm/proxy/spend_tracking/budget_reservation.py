@@ -1274,7 +1274,7 @@ def _estimate_image_generation_cost(
 
     The "output" vs "input" cost-per-image naming is inconsistent across
     providers — OpenAI's dall-e-3 entry uses ``input_cost_per_image`` while
-    aiml/dall-e-3 uses ``output_cost_per_image`` — so both are summed.
+    aiml/blackforestlabs/flux-pro-1.1 uses ``output_cost_per_image`` — so both are summed.
     """
     # Gate strictly on `mode`. Several chat and embedding models carry
     # ``input_cost_per_image`` / ``output_cost_per_image`` to price multimodal
