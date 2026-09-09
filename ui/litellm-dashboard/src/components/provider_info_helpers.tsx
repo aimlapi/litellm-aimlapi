@@ -66,10 +66,10 @@ import xaiLogo from "../../public/assets/logos/xai.svg";
 import xinferenceLogo from "../../public/assets/logos/xinference.svg";
 
 export enum Providers {
+  AIML = "aimlapi.com",
   A2A_Agent = "A2A Agent",
   AI21 = "Ai21",
   AI21_CHAT = "Ai21 Chat",
-  AIML = "AI/ML API",
   AIOHTTP_OPENAI = "Aiohttp Openai",
   Anthropic = "Anthropic",
   ANTHROPIC_TEXT = "Anthropic Text",
@@ -182,10 +182,10 @@ export enum Providers {
 }
 
 export const provider_map: Record<string, string> = {
+  AIML: "aiml",
   A2A_Agent: "a2a_agent",
   AI21: "ai21",
   AI21_CHAT: "ai21_chat",
-  AIML: "aiml",
   AIOHTTP_OPENAI: "aiohttp_openai",
   Anthropic: "anthropic",
   ANTHROPIC_TEXT: "anthropic_text",
