@@ -134,8 +134,12 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
         if not final_api_key:
             raise ValueError("AIML_API_KEY, AIMLAPI_API_KEY or AIMLAPI_KEY is not set")
 
+        # Attribution follows the host the request actually goes to. The helper
+        # resolves the base the same way get_complete_url does (explicit api_base,
+        # then AIML_API_BASE, then the default); pre-filling the default here
+        # would skip the env var and tag a user's own gateway as aimlapi.com.
         return {  # mutable-ok: a fresh dict leaves the caller's header mapping unmutated; the base signature returns dict
-            **aiml_attribution_headers(api_base or self.DEFAULT_BASE_URL),
+            **aiml_attribution_headers(api_base),
             **headers,
             "Authorization": f"Bearer {final_api_key}",
             "Content-Type": "application/json",
