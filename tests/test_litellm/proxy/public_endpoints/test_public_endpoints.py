@@ -1045,7 +1045,7 @@ def test_build_endpoints_empty_providers_returns_empty():
 
 def test_clean_display_name_strips_suffix():
     assert _clean_display_name("OpenAI (`openai`)") == "OpenAI"
-    assert _clean_display_name("AI/ML API (`aiml`)") == "AI/ML API"
+    assert _clean_display_name("aimlapi.com (`aiml`)") == "aimlapi.com"
     assert _clean_display_name("A2A (Agent-to-Agent) (`a2a`)") == "A2A (Agent-to-Agent)"
 
 

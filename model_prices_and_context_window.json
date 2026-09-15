@@ -143,26 +143,20 @@
         "output_cost_per_token": 7e-07,
         "supports_system_messages": true
     },
-    "aiml/dall-e-2": {
+    "aiml/blackforestlabs/flux-pro-1.1": {
         "litellm_provider": "aiml",
-        "metadata": {
-            "notes": "DALL-E 2 via AI/ML API - Reliable text-to-image generation"
-        },
         "mode": "image_generation",
-        "output_cost_per_image": 0.026,
-        "source": "https://docs.aimlapi.com/",
+        "output_cost_per_image": 0.052,
+        "source": "https://api.aimlapi.com/v1/models?include=pricing",
         "supported_endpoints": [
             "/v1/images/generations"
         ]
     },
-    "aiml/dall-e-3": {
+    "aiml/blackforestlabs/flux-pro-1.1-ultra": {
         "litellm_provider": "aiml",
-        "metadata": {
-            "notes": "DALL-E 3 via AI/ML API - High-quality text-to-image generation"
-        },
         "mode": "image_generation",
-        "output_cost_per_image": 0.052,
-        "source": "https://docs.aimlapi.com/",
+        "output_cost_per_image": 0.078,
+        "source": "https://api.aimlapi.com/v1/models?include=pricing",
         "supported_endpoints": [
             "/v1/images/generations"
         ]
@@ -190,7 +184,7 @@
     "aiml/flux-pro/v1.1-ultra": {
         "litellm_provider": "aiml",
         "mode": "image_generation",
-        "output_cost_per_image": 0.063,
+        "output_cost_per_image": 0.078,
         "supported_endpoints": [
             "/v1/images/generations"
         ]

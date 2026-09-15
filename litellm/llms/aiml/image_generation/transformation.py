@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import httpx
 
+from litellm.llms.aiml.common_utils import aiml_attribution_headers, get_aiml_api_key
 from litellm.llms.base_llm.image_generation.transformation import (
     BaseImageGenerationConfig,
 )
@@ -129,15 +130,20 @@ class AimlImageGenerationConfig(BaseImageGenerationConfig):
         api_key: str | None = None,
         api_base: str | None = None,
     ) -> dict:
-        final_api_key: Final[str | None] = (
-            api_key or get_secret_str("AIML_API_KEY") or get_secret_str("AIMLAPI_KEY")  # Alternative name
-        )
+        final_api_key: Final[str | None] = get_aiml_api_key(api_key)
         if not final_api_key:
-            raise ValueError("AIML_API_KEY or AIMLAPI_KEY is not set")
+            raise ValueError("AIML_API_KEY, AIMLAPI_API_KEY or AIMLAPI_KEY is not set")
 
-        headers["Authorization"] = f"Bearer {final_api_key}"
-        headers["Content-Type"] = "application/json"
-        return headers
+        # Attribution follows the host the request actually goes to. The helper
+        # resolves the base the same way get_complete_url does (explicit api_base,
+        # then AIML_API_BASE, then the default); pre-filling the default here
+        # would skip the env var and tag a user's own gateway as aimlapi.com.
+        return {  # mutable-ok: a fresh dict leaves the caller's header mapping unmutated; the base signature returns dict
+            **aiml_attribution_headers(api_base),
+            **headers,
+            "Authorization": f"Bearer {final_api_key}",
+            "Content-Type": "application/json",
+        }
 
     def transform_image_generation_request(
         self,
